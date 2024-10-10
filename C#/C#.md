@@ -106,3 +106,5 @@ string info = string.Format("姓名：{0}，年龄：{1}", name, age);
 Console.WriteLine(info);
 ```
 
+![](./C#.assets/image-20240820100727150.png)
+
