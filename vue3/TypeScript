@@ -1,0 +1,1185 @@
+# 响应式数据
+
+<script lang="ts" setup name="person">
+    import { ref, reactive, computed } from 'vue'
+
+
+## 总结：使用原则
+
+1.若需要一个基本类型的响应式数据，必须使用ref。
+
+2．若需要一个响应式对象，层级不深，ref、reactive都可以。 
+
+3．若需要一个响应式对象，且层级较深，准荐使用reactive。
+
+## ref、reactive两种方法
+
+Reactive
+
+1. 只能定义响应式对象；
+
+2. 直接 .属性 赋值
+
+3. reactive重新分配一个新对象,会失去响应式（可以使用 0bject.assign 去整体替换）
+
+   ```javascript
+   // 下面这个写法页面可以更新
+   Object.assign(car, { brand: '奥托', price: 1 });
+   ```
+   
+   
+
+## 解构响应式对象(toRefs)
+
+​	获取响应式对象的某个属性：toRefs
+
+```javascript
+improt { reactive, toRefs, toRef } from 'vue';
+
+//数据
+let person = reactive({
+	name: '张三',
+	age: 18
+})
+
+let { name, age } = toRefs(person)
+let nl = toRef(preson, 'age')
+console.log(nl.value)
+```
+
+## 计算响应式数据
+
+1.引入 computed
+
+```javascript
+import { computed } from 'vue'
+```
+
+2.定义变量，computed方法
+
+
+
+3.更改computed定义的变量
+
+```javascript
+function changeFullName () { fullName.value = 'li-si' }
+```
+
+完整代码：
+
+```vue
+<template>
+	<div class="person">
+    	姓：<input type="text" v-model="firstName"> <br>
+    	名：<input type="text" v-model="lastName"> <br>
+    	<button @click="changeFullName">改名</button>
+    	全名：<span>{{ fullName }}</span>
+    </div>
+</template>
+
+<script lang="ts" setup name="person">
+    import { ref, reactive, computed } from 'vue'
+
+    let firstName = ref('zhang')
+    let lastName = ref('san')
+
+    let fullName = computed({
+        get() {
+            return firstName.value.slice(0, 1).toUpperCase() + 				firstName.value.slice(1) + '-' + lastName.value
+        },
+        set(val) {
+            const [str1, str2] = val.split('-')
+            firstName.value = str1;
+            lastName.value = str2;
+        }
+    })
+
+    function changeFullName () {
+        fullName.value = 'li-si'
+    }
+</script>
+
+<style scoped>
+    .person {
+        background-color: skyblue;
+        box-shadow: 0 0 10px;
+        border-radius: 10px;
+        padding: 20px;
+    }
+</style>
+```
+
+# Watch监听
+
+Vue3中的watch只能监视一下四种数据
+
+1. ref定义的数据
+2. reactive定义的数据
+3. getter函数（ 能返回一个值的函数 ）
+4. 一个包含上述内容的数组 
+
+## 解除监听
+
+```typescript
+const stopWatch = watch(sum, (newValue, oldValue) => {
+    console.log('sum变化了', newValue, oldValue)
+    if(newValue >= 10) {
+        stopWatch()
+    }
+})
+```
+
+将watch定义，再次调用该函数（ 返回一个用于停止监听的函数 ）
+
+## 监听ref对象
+
+​	监视ref定义的【对象类型】数据：直接写数据名，监视的是对象的【地址值】，若想监视对象内部的数据，要手动开启深度监视。 
+
+​	注意： 
+
+​		1.若修改的是ref定义的对象中的属性，newvalue和oldVa1ue都是新值，因为它们是同一个对象。 
+
+​		2.若修改整个ref定义的对象，newValue是新值，oldValue是旧值，因为不是同一个对象了。
+
+```typescript
+watch( person, (newValue, oldValue) =>{
+    console.log('person变化了', newValue, oldValue)
+}, {deep: true, immediate: true})
+// "deep" 深度监听，默认false
+// "immediate" 调用就执行内部函数
+```
+
+## 监听reactive对象
+
+```typescript
+watch(person, (newValue, oldValue) => {
+	console.log('person变化了', newValue, oldValue)
+})
+watch(obj, (newValue, oldValue) => {
+    console.log('obj变化了', newValue, oldValue)
+}, {deep: false}) //且deep深度监听无法关闭
+```
+
+## 监听对象的某个属性
+
+监听ref、reactive对象的某个属性的情况，该属性都建议写成函数式，
+
+该属性是对象类型时，监听的是地址deep默认为false
+
+```typescript
+let person = reactive({
+    name: '张三',
+    age: 18,
+    car: {
+        c1: '奔驰',
+        c2: '宝马'
+    }
+})
+
+watch(() => person.name, (newValue, oldValue) => {
+    console.log('person.name变化了', newValue, oldValue)
+})
+```
+
+## 监听多个数据
+
+```typescript
+// 监视，情况五：监视上述的多个数据 => 监听的数据写成数组
+watch([() => person.name, person.car], (newValue, oldValue) => {
+    console.log('person.car变化了', newValue, oldValue)
+}, { deep: true })
+```
+
+# watchEffect
+
+```typescript
+// 监视 -- watchEffect实现
+watchEffect(() => {
+    if (temp.value >= 60 || height.value >= 80) {
+        console.log('给服务器发请求')
+    }
+})
+```
+
+官方：立即运行一个函数，同时响应式地追踪其依赖，并在依赖更改时重新执行该函数。
+
+watch对比watchEffect
+
+1. 都能监听响应式数据的变化，不同的是监听数据变化的方式不同。
+2. watch：要明确指出监视的数据
+3. watchEffect：不用明确指出监视的数据（函数中用到哪些属性，那就监视哪些属性）
+
+# 标签的ref属性
+
+作用：用于注册模板引用
+
+​	用在普通DOM标签上，获取的是DOM节点
+
+​	用在组件标签上，获取的是组件实例对象
+
+用在普通DOM标签上：
+
+```vue
+<template>
+	<div class="person">
+        <h1 ref="title1">尚硅谷</h1>
+        <h2 ref="title2">前端</h2>
+        <h3 ref="title3">Vue</h3>
+        <input type="text" ref="input"> <br><br>
+        <button @click="showLog">点我打印内容</button>
+    </div>
+</template>
+
+<script lang="ts" setup name="Person">
+    import { ref } from 'vue'
+    
+    let title1 = ref()
+    let title2 = ref()
+</script>
+```
+
+# hooks组合式开发
+
+组合式开发
+
+![hooks](./TypeScript.assets/hooks/hooks)
+
+也可添加钩子函数
+
+<img src="./TypeScript.assets/hooks/hooks02" alt="hooks02"/>
+
+# 路由router
+
+1、安装路由router
+
+​	npm i vue-router
+
+2、创建router文件
+
+![router文件](./TypeScript.assets/路由router/router文件.png)
+
+3、挂载到App
+
+![挂在到App](./TypeScript.assets/路由router/挂在到App.png)
+
+4、页面
+
+![页面](./TypeScript.assets/路由router/页面.png)
+
+![router-to](./TypeScript.assets/路由router/router-to.png)
+
+## 注意点
+
+![router注意点](./TypeScript.assets/路由router/router注意点.png)
+
+## 工作模式
+
+产品histroy；后台管理hash
+
+![工作模式](./TypeScript.assets/路由router/工作模式.png)
+
+## 命名路由
+
+![命名路由1](./TypeScript.assets/路由router/命名路由1.png)
+
+![命名路由2](./TypeScript.assets/路由router/命名路由2.png)
+
+## 嵌套路由
+
+![嵌套路由1](./TypeScript.assets/路由router/嵌套路由1.png)
+
+![嵌套路由2](./TypeScript.assets/路由router/嵌套路由2.png)
+
+## 路由传参
+
+### query
+
+![路由传参-query](./TypeScript.assets/路由router/路由传参-query.png)
+
+### params
+
+![params](./TypeScript.assets/路由router/params.png)
+
+### props配置
+
+![props配置1](./TypeScript.assets/路由router/props配置1.png)
+
+![props配置2](./TypeScript.assets/路由router/props配置2.png)
+
+## replace属性
+
+![replace属性](./TypeScript.assets/路由router/replace属性.png)
+
+## 重定向
+
+![重定向](./TypeScript.assets/路由router/重定向.png)
+
+## 编程式路由导航
+
+router.push（也可.replace）
+
+![编程式路由导航](./TypeScript.assets/路由router/编程式路由导航.png)
+
+# pinia
+
+集中式状态、数据管理（共享）
+
+## 搭建pinia环境
+
+1. npm i pinia
+
+2. main.ts文件如下代码
+
+   ```typescript
+   // 引入pinia
+   import { createPinia } from 'pinia'
+   // 创建pinia
+   const pinia = creatPinia()
+   // 安装pinia
+   app.use(pinia)
+   ```
+
+## 存储、读取数据
+
+### 存储
+
+1. src目录下新建store文件夹
+
+2. store => 新建文件
+
+3. ```typescript
+   import { defineStore } from 'pinia'
+   
+   export const useCountStore = defineStore('talk', {
+       //存储数据
+       state() {
+           return {
+               sum: 6,
+               school: '21',
+               address: '231'
+           }
+       }
+   })
+   ```
+
+### 读取
+
+```typescript
+import { useCountStore } from '@/store/loveTalk'
+
+const countStore = useCountStore();
+console.log(countStore.sum);
+```
+
+## 修改数据
+
+### 第一种
+
+```typescript
+// 引用组件内定义方法
+function add() {
+    countStore.sum += 1
+}
+```
+
+### 第二种
+
+```typescript
+// 引用组件内定义方法
+function add() {
+    countStore.$patch({
+        sum: 88,
+        school: '111',
+        address: 'bj'
+    })
+}
+```
+
+### 第三种
+
+```typescript
+// 1.store文件夹下对应文件定义 actions 代码块
+import { defineStore } from 'pinia'
+
+export const useTalkStore = defineStore('talk', {
+    // actions里面放置的是一个一个的方法，用于响应组件中的 "动作"
+    actions: {
+      increment(value) {
+          console.log('increment被调用了', value)
+          if ( this.sum < 10 ) {
+             this.sum += value 
+          }
+      }  
+    },
+    // 存储数据
+    state() {
+        return {
+            sum: 6,
+            school: '21',
+            address: '231'
+        }
+    }
+})
+
+// 2.引用组件内定义方法
+function add() {
+    countStore.increment(n.value)
+}
+```
+
+## storeToRefs解构数据
+
+```typescript
+// storeToRefs解构pinia定义的..
+const { sum, school, address } = storeToRefs(countStore)
+```
+
+## getters
+
+```typescript
+// store里的文件定义
+export const useTalkStore = defineStore('talk', {
+    // actions里面放置的是一个一个的方法，用于响应组件中的 "动作"
+    actions: {
+        ...
+    },
+    // 存储数据
+    state() {
+        return {
+            sum: 6,
+            school: '21',
+            address: '231'
+        }
+    },
+    getters: {
+        bigSum:state => state.sum * 10,
+        upperSchool():string {
+            return this.school.toUpperCase()
+        }
+    }
+})
+```
+
+## 监视数据$subscribe
+
+```typescript
+// 引用组件
+import { useTalkStore } from '@/store/loveTalk'
+
+const talkStore = useTalkStore();
+talkStore.$subscribe((mutate, state) => {
+    console.log('talkStore里面保存的数据发生了变化', mutate, state)
+    // 存入浏览器实现刷新不丢失数据
+    localStorage.setItem('talkList', JSON.stringify(state.talkList))
+})
+
+// store对应文件
+export const useTalkStore = defineStore('talk', {
+    // actions里面放置的是一个一个的方法，用于响应组件中的 "动作"
+    actions: {
+        ...
+    },
+    // 存储数据
+    state() {
+        return {
+            talkList: JSON.parse(localStorage.getItem('talkList') as string) || []
+        }
+    }
+})
+```
+
+# 组件通信
+
+**`Vue3`组件通信和`Vue2`的区别：**
+
+* 移出事件总线，使用`mitt`代替。
+
+- `vuex`换成了`pinia`。
+- 把`.sync`优化到了`v-model`里面了。
+- 把`$listeners`所有的东西，合并到`$attrs`中了。
+- `$children`被砍掉了。
+
+**常见搭配形式：
+
+![](./TypeScript.assets/总结.png)
+
+## props
+
+父组件子组件互相传
+
+```vue
+<script lang="ts" setup name="Person">
+	import { withDefaults } from 'vue'
+    import { type Persons } from '@/types'
+    
+    // 只接受List
+    // defineProps(['list'])
+    
+    // 接受list + 限制类型
+    // defineProps<{list: persons}>()
+    
+    //接受list + 限制类型 + 限制必要性 + 指定默认值
+    withDefaults( defineProps<{list?: Persons}>(), {
+        list:() => [{id: 'ausydgyu01', name: '康师傅·王麻子·特仑苏', age: 19}]
+    })
+</script>
+```
+
+```vue
+<template>
+	<div>
+        <h3>父组件</h3>
+        <h4>汽车：{{ car }}</h4>
+        <Child :car="car" :sendToy="getToy"/>
+    </div>
+</template>
+
+<script lang="ts" setup>
+    import Child from './Child.vue'
+    import { ref } from 'vue'
+    
+    let car = ref('奔驰')
+    function getToy(value: string) {
+        console.log('父',value)
+    }
+</script>
+<style scoped>
+</style>
+
+<template>
+	<div>
+        <h3>子组件</h3>
+        <h4>玩具：{{ toy }}</h4>
+        <h4>父给的车：{{ car }}</h4>
+        <button @click="sendToy(toy)">把玩具给父亲</button>
+    </div>
+</template>
+
+<script lang="ts" setup>
+    import { ref } from 'vue'
+    
+    let toy = ref('奥特曼')
+    // 声明接受props
+    defineProps(['car', 'sendToy'])
+</script>
+<style scoped>
+</style>
+```
+
+## 自定义事件
+
+![自定义事件](./TypeScript.assets/组件通信/自定义事件.png)
+
+## mitt
+
+类似第三方封装的自定义事件
+
+1. 安装mitt
+
+   npm i mitt
+
+2. 新建文件
+
+   ![mitt](./TypeScript.assets/组件通信/mitt.png)
+
+3. 引入main
+
+   ![mitt2](./TypeScript.assets/组件通信/mitt2.png)
+
+4. 子组件互相通信
+
+   ![mitt3](./TypeScript.assets/组件通信/mitt3.png)
+
+## v-model
+
+1. 概述：实现 **父↔子** 之间相互通信。
+
+2. 前序知识 —— `v-model`的本质
+
+   ```vue
+   <!-- 使用v-model指令 -->
+   <input type="text" v-model="userName">
+   
+   <!-- v-model的本质是下面这行代码 -->
+   <input 
+     type="text" 
+     :value="userName" 
+     @input="userName =(<HTMLInputElement>$event.target).value"
+   >
+   ```
+
+3. 组件标签上的`v-model`的本质：`:moldeValue` ＋ `update:modelValue`事件。
+
+   ```vue
+   <!-- 组件标签上使用v-model指令 -->
+   <AtguiguInput v-model="userName"/>
+   
+   <!-- 组件标签上v-model的本质 -->
+   <AtguiguInput :modelValue="userName" @update:model-value="userName = $event"/>
+   ```
+
+   `AtguiguInput`组件中：
+
+   ```vue
+   <template>
+     <div class="box">
+       <!--将接收的value值赋给input元素的value属性，目的是：为了呈现数据 -->
+   		<!--给input元素绑定原生input事件，触发input事件时，进而触发update:model-value事件-->
+       <input 
+          type="text" 
+          :value="modelValue" 
+          @input="emit('update:model-value',$event.target.value)"
+       >
+     </div>
+   </template>
+   
+   <script setup lang="ts" name="AtguiguInput">
+     // 接收props
+     defineProps(['modelValue'])
+     // 声明事件
+     const emit = defineEmits(['update:model-value'])
+   </script>
+   ```
+
+4. 也可以更换`value`，例如改成`abc`
+
+   ```vue
+   <!-- 也可以更换value，例如改成abc-->
+   <AtguiguInput v-model:abc="userName"/>
+   
+   <!-- 上面代码的本质如下 -->
+   <AtguiguInput :abc="userName" @update:abc="userName = $event"/>
+   ```
+
+   `AtguiguInput`组件中：
+
+   ```vue
+   <template>
+     <div class="box">
+       <input 
+          type="text" 
+          :value="abc" 
+          @input="emit('update:abc',$event.target.value)"
+       >
+     </div>
+   </template>
+   
+   <script setup lang="ts" name="AtguiguInput">
+     // 接收props
+     defineProps(['abc'])
+     // 声明事件
+     const emit = defineEmits(['update:abc'])
+   </script>
+   ```
+
+5. 如果`value`可以更换，那么就可以在组件标签上多次使用`v-model`
+
+   ```vue
+   <AtguiguInput v-model:abc="userName" v-model:xyz="password"/>
+   ```
+
+
+## $attrs
+
+1. 实现组件通信的祖 => 孙
+2. $attrs 是一个对象，包含所有属性（排除props接受过的属性）
+
+父组件：
+
+```vue
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+		<Child :a="a" :b="b" :c="c" :d="d" v-bind="{x:100,y:200}" :updateA="updateA"/>
+  </div>
+</template>
+
+<script setup lang="ts" name="Father">
+	import Child from './Child.vue'
+	import { ref } from "vue";
+	let a = ref(1)
+	let b = ref(2)
+	let c = ref(3)
+	let d = ref(4)
+
+	function updateA(value){
+		a.value = value
+	}
+</script>
+```
+
+子组件：
+
+```vue
+<template>
+	<div class="child">
+		<h3>子组件</h3>
+		<GrandChild v-bind="$attrs"/>
+	</div>
+</template>
+
+<script setup lang="ts" name="Child">
+	import GrandChild from './GrandChild.vue'
+</script>
+```
+
+孙组件：
+
+```vue
+<template>
+	<div class="grand-child">
+		<h3>孙组件</h3>
+		<h4>a：{{ a }}</h4>
+		<h4>b：{{ b }}</h4>
+		<h4>c：{{ c }}</h4>
+		<h4>d：{{ d }}</h4>
+		<h4>x：{{ x }}</h4>
+		<h4>y：{{ y }}</h4>
+		<button @click="updateA(666)">点我更新A</button>
+	</div>
+</template>
+
+<script setup lang="ts" name="GrandChild">
+	defineProps(['a','b','c','d','x','y','updateA'])
+</script>
+```
+
+## $refs、$parent
+
+概述：
+
+* `$refs`用于 ：**父→子。**
+* `$parent`用于：**子→父。**
+
+父组件：
+
+```vue
+<template>
+	<div class="father">
+		<h3>父组件</h3>
+		<h4>房产：{{ house }}</h4>
+		<button @click="getAllChild($refs)">让所有孩子的书变多</button>
+	</div>
+</template>
+
+<script setup lang="ts" name="Father">
+	import Child1 from './Child1.vue'
+	import Child2 from './Child2.vue'
+	import { ref,reactive } from "vue";
+	let c1 = ref()
+	let c2 = ref()
+	
+
+	// 数据
+	let house = ref(4)
+    
+	function getAllChild(refs:{[key:string]:any}){
+		console.log(refs)
+		for (let key in refs){
+			refs[key].book += 3
+		}
+	}
+	// 向外部提供数据
+	defineExpose({house})
+</script>
+```
+
+子组件1：
+
+```vue
+<template>
+  <div class="child1">
+    <h3>子组件1</h3>
+		<h4>玩具：{{ toy }}</h4>
+		<h4>书籍：{{ book }} 本</h4>
+		<button @click="minusHouse($parent)">干掉父亲的一套房产</button>
+  </div>
+</template>
+
+<script setup lang="ts" name="Child1">
+	import { ref } from "vue";
+	// 数据
+	let toy = ref('奥特曼')
+	let book = ref(3)
+
+	// 方法
+	function minusHouse(parent:any){
+		parent.house -= 1
+	}
+    
+	// 把数据交给外部
+	defineExpose({toy,book})
+</script>
+```
+
+子组件2：
+
+```vue
+<template>
+  <div class="child2">
+    <h3>子组件2</h3>
+		<h4>电脑：{{ computer }}</h4>
+		<h4>书籍：{{ book }} 本</h4>
+  </div>
+</template>
+
+<script setup lang="ts" name="Child2">
+		import { ref } from "vue";
+		// 数据
+		let computer = ref('联想')
+		let book = ref(6)
+		// 把数据交给外部
+		defineExpose({computer,book})
+</script>
+```
+
+## provide、inject
+
+父组件：
+
+```vue
+<template>
+  <div class="father">
+    <h3>父组件</h3>
+    <h4>银子：{{ money }}万元</h4>
+    <h4>车子：一辆{{car.brand}}车，价值{{car.price}}万元</h4>
+    <Child/>
+  </div>
+</template>
+
+<script setup lang="ts" name="Father">
+  import Child from './Child.vue'
+  import {ref,reactive,provide} from 'vue'
+
+  let money = ref(100)
+  let car = reactive({
+    brand:'奔驰',
+    price:100
+  })
+  function updateMoney(value:number){
+    money.value -= value
+  }
+
+  // 向后代提供数据
+  provide('moneyContext',{money,updateMoney})
+  provide('car',car)
+
+</script>
+```
+
+子组件：（不变化）
+
+```vue
+<template>
+  <div class="child">
+    <h3>我是子组件</h3>
+    <GrandChild/>
+  </div>
+</template>
+
+<script setup lang="ts" name="Child">
+  import GrandChild from './GrandChild.vue'
+</script>
+```
+
+孙组件：
+
+```vue
+<template>
+  <div class="grand-child">
+    <h3>我是孙组件</h3>
+    <h4>银子：{{ money }}</h4>
+    <h4>车子：一辆{{car.brand}}车，价值{{car.price}}万元</h4>
+    <button @click="updateMoney(6)">花爷爷的钱</button>
+  </div>
+</template>
+
+<script setup lang="ts" name="GrandChild">
+  import { inject } from "vue";
+
+  let {money,updateMoney} = inject('moneyContext',{money:0,updateMoney:(param:number)=>{}})
+  let car = inject('car',{brand:'未知',price:0})
+</script>
+```
+
+
+
+## pinia
+
+参考之前
+
+# slot
+
+## 默认插槽
+
+```vue
+父组件中：
+        <Category title="今日热门游戏">
+          <ul>
+            <li v-for="g in games" :key="g.id">{{ g.name }}</li>
+          </ul>
+        </Category>
+子组件中：
+        <template>
+          <div class="item">
+            <h3>{{ title }}</h3>
+            <!-- 默认插槽 -->
+            <slot></slot>
+          </div>
+        </template>
+```
+
+## 具名插槽
+
+```vue
+父组件中：
+        <Category title="今日热门游戏">
+          <template v-slot:s1>
+            <ul>
+              <li v-for="g in games" :key="g.id">{{ g.name }}</li>
+            </ul>
+          </template>
+          <template #s2>
+            <a href="">更多</a>
+          </template>
+        </Category>
+子组件中：
+        <template>
+          <div class="item">
+            <h3>{{ title }}</h3>
+            <slot name="s1"></slot>
+            <slot name="s2"></slot>
+          </div>
+        </template>
+```
+
+## 作用域插槽
+
+1. 理解：<span style="color:red">数据在组件的自身，但根据数据生成的结构需要组件的使用者来决定。</span>（新闻数据在`News`组件中，但使用数据所遍历出来的结构由`App`组件决定）
+
+2. 具体编码：
+
+   ```vue
+   父组件中：
+         <Game v-slot="params">
+         <!-- <Game v-slot:default="params"> -->
+         <!-- <Game #default="params"> -->
+           <ul>
+             <li v-for="g in params.games" :key="g.id">{{ g.name }}</li>
+           </ul>
+         </Game>
+   
+   子组件中：
+         <template>
+           <div class="category">
+             <h2>今日游戏榜单</h2>
+             <slot :games="games" a="哈哈"></slot>
+           </div>
+         </template>
+   
+         <script setup lang="ts" name="Category">
+           import {reactive} from 'vue'
+           let games = reactive([
+             {id:'asgdytsa01',name:'英雄联盟'},
+             {id:'asgdytsa02',name:'王者荣耀'},
+             {id:'asgdytsa03',name:'红色警戒'},
+             {id:'asgdytsa04',name:'斗罗大陆'}
+           ])
+         </script>
+   ```
+
+# 其他API
+
+## shallowRef 与 shallowReactive
+
+### `shallowRef`
+
+1. 作用：创建一个响应式数据，但只对顶层属性进行响应式处理。
+
+2. 用法：
+
+   ```js
+   let myVar = shallowRef(initialValue);
+   ```
+
+3. 特点：只跟踪引用值的变化，不关心值内部的属性变化。
+
+### `shallowReactive`
+
+1. 作用：创建一个浅层响应式对象，只会使对象的最顶层属性变成响应式的，对象内部的嵌套属性则不会变成响应式的
+
+2. 用法：
+
+   ```js
+   const myObj = shallowReactive({ ... });
+   ```
+
+3. 特点：对象的顶层属性是响应式的，但嵌套对象的属性不是。
+
+### 总结
+
+> 通过使用 [`shallowRef()`](https://cn.vuejs.org/api/reactivity-advanced.html#shallowref) 和 [`shallowReactive()`](https://cn.vuejs.org/api/reactivity-advanced.html#shallowreactive) 来绕开深度响应。浅层式 `API` 创建的状态只在其顶层是响应式的，对所有深层的对象不会做任何处理，避免了对每一个内部属性做响应式所带来的性能成本，这使得属性的访问变得更快，可提升性能。
+
+## readonly 与 shallowReadonly
+
+### **`readonly`**
+
+1. 作用：用于创建一个对象的深只读副本。
+
+2. 用法：
+
+   ```js
+   const original = reactive({ ... });
+   const readOnlyCopy = readonly(original);
+   ```
+
+3. 特点：
+
+   * 对象的所有嵌套属性都将变为只读。
+   * 任何尝试修改这个对象的操作都会被阻止（在开发模式下，还会在控制台中发出警告）。
+
+4. 应用场景：
+
+   * 创建不可变的状态快照。
+   * 保护全局状态或配置不被修改。
+
+### **`shallowReadonly`**
+
+1. 作用：与 `readonly` 类似，但只作用于对象的顶层属性。
+
+2. 用法：
+
+   ```js
+   const original = reactive({ ... });
+   const shallowReadOnlyCopy = shallowReadonly(original);
+   ```
+
+3. 特点：
+
+   * 只将对象的顶层属性设置为只读，对象内部的嵌套属性仍然是可变的。
+
+   * 适用于只需保护对象顶层属性的场景。
+
+## toRaw 与 markRaw
+
+toRaw 与 markRaw
+
+1. 
+
+   ```js
+   /* markRaw */
+   let citys = markRaw([
+     {id:'asdda01',name:'北京'},
+     {id:'asdda02',name:'上海'},
+     {id:'asdda03',name:'天津'},
+     {id:'asdda04',name:'重庆'}
+   ])
+   // 根据原始对象citys去创建响应式对象citys2 —— 创建失败，因为citys被markRaw标记了
+   let citys2 = reactive(citys)
+   ```
+
+## customRef
+
+作用：创建一个自定义的`ref`，并对其依赖项跟踪和更新触发进行逻辑控制。
+
+实现防抖效果（`useSumRef.ts`）：
+
+```typescript
+import {customRef } from "vue";
+
+export default function(initValue:string,delay:number){
+  let msg = customRef((track,trigger)=>{
+    let timer:number
+    return {
+      get(){
+        track() // 告诉Vue数据msg很重要，要对msg持续关注，一旦变化就更新
+        return initValue
+      },
+      set(value){
+        clearTimeout(timer)
+        timer = setTimeout(() => {
+          initValue = value
+          trigger() //通知Vue数据msg变化了
+        }, delay);
+      }
+    }
+  }) 
+  return {msg}
+}
+```
+
+# Vue3新组件
+
+## Teleport
+
+- 什么是Teleport？—— Teleport 是一种能够将我们的**组件html结构**移动到指定位置的技术。
+
+```html
+<teleport to='body' >
+    <div class="modal" v-show="isShow">
+      <h2>我是一个弹窗</h2>
+      <p>我是弹窗中的一些内容</p>
+      <button @click="isShow = false">关闭弹窗</button>
+    </div>
+</teleport>
+```
+
+## Suspense
+
+-  等待异步组件时渲染一些额外内容，让应用有更好的用户体验 
+-  使用步骤： 
+   -  异步引入组件
+   -  使用`Suspense`包裹组件，并配置好`default` 与 `fallback`
+
+```tsx
+import { defineAsyncComponent,Suspense } from "vue";
+const Child = defineAsyncComponent(()=>import('./Child.vue'))
+```
+
+```vue
+<template>
+    <div class="app">
+        <h3>我是App组件</h3>
+        <Suspense>
+          <template v-slot:default>
+            <Child/>
+          </template>
+          <template v-slot:fallback>
+            <h3>加载中.......</h3>
+          </template>
+        </Suspense>
+    </div>
+</template>
+```
+
+
+
+## 全局API转移到应用对象
+
+- `app.component`
+- `app.config`
+- `app.directive`
+- `app.mount`
+- `app.unmount`
+- `app.use`
+
+## 其他
+
+（Vue3迁移指南）
+
+- 过渡类名 `v-enter` 修改为 `v-enter-from`、过渡类名 `v-leave` 修改为 `v-leave-from`。
+
+
+- `keyCode` 作为 `v-on` 修饰符的支持。
+
+- `v-model` 指令在组件上的使用已经被重新设计，替换掉了 `v-bind.sync。`
+
+- `v-if` 和 `v-for` 在同一个元素身上使用时的优先级发生了变化。
+
+- 移除了`$on`、`$off` 和 `$once` 实例方法。
+
+- 移除了过滤器 `filter`。
+
+- 移除了`$children` 实例 `propert`。
+
+  ......
