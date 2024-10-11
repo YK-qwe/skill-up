@@ -242,11 +242,11 @@ watch对比watchEffect
 
 组合式开发
 
-![hooks](./TypeScript.assets/hooks/hooks)
+![image-20241010165810100](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101658172.png)
 
 也可添加钩子函数
 
-<img src="./TypeScript.assets/hooks/hooks02" alt="hooks02"/>
+![image-20241010165833960](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101658017.png)
 
 # 路由router
 
@@ -256,69 +256,69 @@ watch对比watchEffect
 
 2、创建router文件
 
-![router文件](./TypeScript.assets/路由router/router文件.png)
+![router文件](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101658309.png)
 
 3、挂载到App
 
-![挂在到App](./TypeScript.assets/路由router/挂在到App.png)
+![挂在到App](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101658761.png)
 
 4、页面
 
-![页面](./TypeScript.assets/路由router/页面.png)
+![页面](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101652220.png)
 
-![router-to](./TypeScript.assets/路由router/router-to.png)
+![router-to](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101659661.png)
 
 ## 注意点
 
-![router注意点](./TypeScript.assets/路由router/router注意点.png)
+![router注意点](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101659441.png)
 
 ## 工作模式
 
 产品histroy；后台管理hash
 
-![工作模式](./TypeScript.assets/路由router/工作模式.png)
+![工作模式](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101659980.png)
 
 ## 命名路由
 
-![命名路由1](./TypeScript.assets/路由router/命名路由1.png)
+![命名路由1](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101659747.png)
 
-![命名路由2](./TypeScript.assets/路由router/命名路由2.png)
+![命名路由2](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101659683.png)
 
 ## 嵌套路由
 
-![嵌套路由1](./TypeScript.assets/路由router/嵌套路由1.png)
+![嵌套路由1](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101659496.png)
 
-![嵌套路由2](./TypeScript.assets/路由router/嵌套路由2.png)
+![嵌套路由2](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101659102.png)
 
 ## 路由传参
 
 ### query
 
-![路由传参-query](./TypeScript.assets/路由router/路由传参-query.png)
+![路由传参-query](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101659022.png)
 
 ### params
 
-![params](./TypeScript.assets/路由router/params.png)
+![params](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101659142.png)
 
 ### props配置
 
-![props配置1](./TypeScript.assets/路由router/props配置1.png)
+![props配置1](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101659194.png)
 
-![props配置2](./TypeScript.assets/路由router/props配置2.png)
+![props配置2](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101659115.png)
 
 ## replace属性
 
-![replace属性](./TypeScript.assets/路由router/replace属性.png)
+![replace属性](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101659114.png)
 
 ## 重定向
 
-![重定向](./TypeScript.assets/路由router/重定向.png)
+![重定向](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101700633.png)
 
 ## 编程式路由导航
 
 router.push（也可.replace）
 
-![编程式路由导航](./TypeScript.assets/路由router/编程式路由导航.png)
+![编程式路由导航](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101700511.png)
 
 # pinia
 
@@ -501,7 +501,7 @@ export const useTalkStore = defineStore('talk', {
 
 **常见搭配形式：
 
-![](./TypeScript.assets/总结.png)
+![](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101700446.png)
 
 ## props
 
@@ -568,7 +568,7 @@ export const useTalkStore = defineStore('talk', {
 
 ## 自定义事件
 
-![自定义事件](./TypeScript.assets/组件通信/自定义事件.png)
+![自定义事件](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101700586.png)
 
 ## mitt
 
@@ -580,15 +580,15 @@ export const useTalkStore = defineStore('talk', {
 
 2. 新建文件
 
-   ![mitt](./TypeScript.assets/组件通信/mitt.png)
+   ![mitt](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101700116.png)
 
 3. 引入main
 
-   ![mitt2](./TypeScript.assets/组件通信/mitt2.png)
+   ![mitt2](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101700787.png)
 
 4. 子组件互相通信
 
-   ![mitt3](./TypeScript.assets/组件通信/mitt3.png)
+   ![mitt3](https://picgoimg-typora.oss-cn-hangzhou.aliyuncs.com/202410101700759.png)
 
 ## v-model
 
