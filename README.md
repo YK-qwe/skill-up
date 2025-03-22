@@ -1,2 +1,2 @@
-# typora
-typora的笔记
+# skill-up
+skill-up笔记
