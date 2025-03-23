@@ -1,3 +1,5 @@
+<!--阿里云OSS以及Github作免费图床都不好用，现使用相对路径-->
+
 # typora官网
 
 中文站：https://typoraio.cn/
