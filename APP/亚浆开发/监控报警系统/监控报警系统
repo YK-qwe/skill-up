@@ -1,0 +1,167 @@
+# 前端播放解决方案
+
+## 一、工具准备
+
+- VCL播放器：验证rtsp地址是否正确
+
+## 二、基础信息含义
+
+### 1.rtsp地址
+
+例如：rtsp://admin:napp9051@172.18.252.20:554/h265/ch33/main/av_stream
+
+- admin:napp9051	=>	摄像头的账号:密码
+- 172.18.252.20:554	=>	摄像头所连接的IP地址，554为默认端口号
+- h265	=>	编码方式
+- ch33	=>	通道33（默认33开始）。如果摄像头为热成像摄像头则一般会有两个通道，分别对应普通画面和热成像画面。
+- main	=>	主码流（子码流sub）
+
+### 2.rtsp地址（海康威视）
+
+1. 监控实时画面
+
+   rtsp://admin:napp9051@172.18.252.20:554/Streaming/Channels/101
+
+2. 指定时间回放
+
+​	rtsp://admin:napp9051@172.18.252.20:554/Streaming/tracks/101?
+
+​			transportmode=multicast&starttime=20250414T080000Z&endtime=20250414T120000Z	 
+
+## 三、方案1—C#实现
+
+​	通过ffmpeg拉取海康摄像头rtsp流转m3u8
+
+​	参考https://www.cnblogs.com/stephenzengx/p/13673981.html
+
+1.工具准备
+
+- ffmpeg：拉取rtsp流生成m3u8文件
+
+2.准备C#Windows服务项目
+
+- 新建Windows服务
+
+  ![{1A5635F7-D4C4-4BDF-B443-688087D5E831}](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/{1A5635F7-D4C4-4BDF-B443-688087D5E831}.png)
+
+- Service1.cs重命名为HslService.cs
+
+  ![{FAE316CD-2C0B-4156-9122-AF5DA0B7E43C}](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/%7BFAE316CD-2C0B-4156-9122-AF5DA0B7E43C%7D.png)
+
+- 点击HlsService编辑代码（详细代码见附件）
+
+  ![{4DF35FFB-C53B-49CA-ACDF-98EF31CA6475}](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/%7B4DF35FFB-C53B-49CA-ACDF-98EF31CA6475%7D.png)
+
+- 添加Windows安装程序
+
+  ![image-20250415140208603](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415140208603.png)
+
+​	![image-20250415140416664](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415140416664.png)
+
+![image-20250415140555487](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415140555487.png)
+
+![image-20250415140602101](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415140602101.png)
+
+![image-20250415140610683](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415140610683.png)
+
+![image-20250415140621817](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415140621817.png)
+
+![image-20250415140644635](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415140644635.png)
+
+![image-20250415140717349](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415140717349.png)
+
+![image-20250415140737708](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415140737708.png)
+
+![image-20250415140804033](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415140804033.png)
+
+![image-20250415140812226](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415140812226.png)
+
+![image-20250415140822805](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415140822805.png)
+
+## 四、方案2—webrtc-streamer
+
+参考[基于Vue框架的RTSP视频流实时播放功能实现指南 - 云原生实践](https://www.oryoy.com/news/ji-yu-vue-kuang-jia-de-rtsp-shi-pin-liu-shi-shi-bo-fang-gong-neng-shi-xian-zhi-nan.html)
+
+1.下载系统对应的webrtc-streamer
+
+https://github.com/mpromonet/webrtc-streamer/releases
+
+2.解压后双击exe启动服务
+
+![image-20250415141855823](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415141855823.png)
+
+![image-20250415141928292](./%E7%9B%91%E6%8E%A7%E6%8A%A5%E8%AD%A6%E7%B3%BB%E7%BB%9F.assets/image-20250415141928292.png)
+
+- 访问本机8000端口能看到本机画面则成功
+
+3.JS文件移动到自有项目下
+
+- 将`webrtc-streamer`下载包中的`webrtcstreamer.js`和`adapter.min.js`文件复制到Vue项目的`public/static`目录下
+
+- ```html
+   <script src="static/webrtcstreamer.js"></script>
+     <script src="static/adapter.min.js"></script>
+  ```
+
+4.前端测试代码
+
+```VUE
+<template>
+  <div>
+    <!-- <el-button @click="handleChange">切换</el-button> -->
+    <video id="video" autoplay width="900" height="900"></video>
+    <!-- <video id="video1" autoplay width="900" height="900"></video> -->
+  </div>
+</template>
+ 
+<script>
+
+export default {
+  name: 'index1',
+  data() {
+    return {
+      webRtcServer: null
+    }
+  },
+  mounted() {
+    //video：需要绑定的video控件ID
+    //127.0.0.1:8000：启动webrtc-streamer的设备IP和端口，默认8000
+    this.webRtcServer = new WebRtcStreamer('video','http://172.18.242.68:8000')
+    //需要查看的rtsp地址
+    // this.webRtcServer.connect('rtsp://admin:napp9051@172.18.252.20:554/Streaming/Channels/101')
+    this.webRtcServer.connect('rtsp://admin:napp9051@172.18.252.20:554/Streaming/tracks/101?transportmode=multicast&starttime=20250414T080000Z&endtime=20250414T120000Z')
+    // this.webRtcServer1 = new WebRtcStreamer('video1','http://172.18.242.68:8000')
+    // this.webRtcServer1.connect('rtsp://admin:napp9051@172.18.252.20:554/h265/ch34/main/av_stream')
+    //rtsp://user:password@ip:port/h264/ch1/main/av_stream--海康
+    //rtsp://user:password@ip:port/cam/realmonitor?channel=1&subtype=0--大华
+  },
+  beforeDestroy() {
+    this.webRtcServer.disconnect()
+    this.webRtcServer = null
+  },
+  methods: {
+    // handleChange() {
+    //   this.webRtcServer.connect('rtsp://user:password@ip:port/h264/ch1/main/av_stream')
+    // }
+  }
+}
+</script>
+ 
+<style scoped></style>
+```
+
+
+
+# 后端告警信息数据处理
+
+**核心逻辑**：将短时间内同一对象的同类告警合并为**持续性事件**而非离散告警。
+
+- 设置时间窗口阈值（同一摄像头、同类型告警在窗口期内视为同一事件）
+- lastTime
+- 告警类型分级
+- 合并告警信息
+
+优化：
+
+- 盒子、分组排序
+- 摄像头所有重置
